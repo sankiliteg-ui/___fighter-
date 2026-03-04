@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💖 Annu Ka Special Page 💖</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.4/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Georgia',serif;background:#050010}
+canvas{display:block}
+.page{position:fixed;inset:0;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:10}
+.page.active{display:flex}
+#p1bg{position:fixed;inset:0;z-index:1}
+#p2bg{position:fixed;inset:0;z-index:2}
+#countdown{font-size:45vw;font-weight:900;color:transparent;background:linear-gradient(45deg,#ff69b4,#ff1493,#ffd700,#ff69b4);-webkit-background-clip:text;background-clip:text;line-height:1;filter:drop-shadow(0 0 30px #ff1493);position:relative;z-index:20;animation:throb 0.8s ease-in-out infinite}
+@keyframes throb{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.12) rotate(2deg)}}
+#msg1{position:relative;z-index:20;font-size:clamp(15px,5.5vw,38px);text-align:center;padding:24px 20px;font-weight:bold;opacity:0;line-height:1.6;letter-spacing:1px;background:linear-gradient(45deg,#ff69b4,#ffd700,#ff1493);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 15px rgba(255,20,147,0.5))}
+#page1{z-index:5;background:radial-gradient(ellipse at center,#1a0030 0%,#05000f 70%)}
+#page2{z-index:5;background:transparent}
+#page3{z-index:5;background:radial-gradient(ellipse at center,#150025 0%,#050010 70%);padding:20px;gap:14px;overflow-y:auto}
+.p2wrap{position:relative;z-index:20;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px}
+#gm-title{font-size:clamp(28px,9vw,80px);font-weight:900;background:linear-gradient(45deg,#ff69b4,#ff1493,#ffd700,#ff69b4,#ff1493);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(0.3) rotate(-10deg);line-height:1.15;filter:drop-shadow(0 0 20px rgba(255,20,147,0.6))}
+#gm-sub{font-size:clamp(13px,3.5vw,26px);color:#ffe4f7;opacity:0;letter-spacing:4px;font-weight:600;text-shadow:0 0 15px rgba(255,105,180,0.8)}
+#gm-hearts{font-size:clamp(20px,5vw,40px);opacity:0;letter-spacing:5px}
+#btn-cam{padding:15px 36px;background:linear-gradient(135deg,#ff1493,#ff69b4,#ffd700);border:none;border-radius:50px;color:#fff;font-size:clamp(14px,3.5vw,20px);font-weight:bold;cursor:pointer;box-shadow:0 0 30px rgba(255,20,147,0.6),0 0 60px rgba(255,20,147,0.3);opacity:0;transform:translateY(40px);letter-spacing:2px;-webkit-tap-highlight-color:transparent;text-shadow:0 1px 3px rgba(0,0,0,0.3)}
+#page3-title{font-size:clamp(18px,5.5vw,36px);color:#ff69b4;font-weight:900;text-align:center;text-shadow:0 0 20px rgba(255,105,180,0.9);letter-spacing:2px}
+#cam-wrap{position:relative;width:min(88vw,400px);height:min(68vw,310px);border-radius:20px;overflow:hidden;border:3px solid #ff69b4;box-shadow:0 0 40px rgba(255,20,147,0.5),0 0 80px rgba(255,20,147,0.2)}
+#vid{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#ov{position:absolute;inset:0;transform:scaleX(-1)}
+#compliment{background:linear-gradient(135deg,rgba(255,20,147,0.12),rgba(255,105,180,0.08));border:1.5px solid rgba(255,105,180,0.35);border-radius:18px;padding:14px 18px;color:#fff;font-size:clamp(13px,3.2vw,18px);text-align:center;max-width:90vw;min-height:56px;display:flex;align-items:center;justify-content:center;letter-spacing:0.8px;line-height:1.5;font-weight:500;backdrop-filter:blur(10px);box-shadow:0 0 20px rgba(255,20,147,0.1)}
+#status{color:rgba(255,190,220,0.65);font-size:clamp(10px,2.3vw,13px);text-align:center}
+.sparkle{position:fixed;pointer-events:none;z-index:999;font-size:22px;animation:fly 1.4s ease-out forwards}
+@keyframes fly{0%{opacity:1;transform:translate(0,0) scale(1) rotate(0deg)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0.2) rotate(360deg)}}
+#loader{position:fixed;inset:0;background:#050010;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:16px}
+#ltext{color:#ff69b4;font-size:clamp(16px,5vw,24px);font-weight:bold;letter-spacing:3px;text-shadow:0 0 20px rgba(255,105,180,0.8)}
+#lbar-bg{width:min(70vw,250px);height:6px;background:rgba(255,255,255,0.08);border-radius:10px;overflow:hidden}
+#lbar{height:100%;width:0%;background:linear-gradient(90deg,#ff1493,#ffd700,#ff69b4);border-radius:10px}
+#lsub{color:rgba(255,200,230,0.45);font-size:clamp(10px,2.5vw,13px);text-align:center}
+#backbtn{position:fixed;top:14px;left:14px;z-index:500;padding:8px 18px;background:rgba(255,20,147,0.15);border:1px solid rgba(255,105,180,0.5);border-radius:20px;color:#ff69b4;font-size:13px;cursor:pointer;backdrop-filter:blur(10px);display:none;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div style="font-size:52px;animation:throb 1s infinite">💖</div>
+  <div id="ltext">Loading Magic...</div>
+  <div id="lbar-bg"><div id="lbar"></div></div>
+  <div id="lsub">Preparing something special for Annu ✨</div>
+</div>
+
+<button id="backbtn" onclick="goBack()">← Back</button>
+<canvas id="p1bg"></canvas>
+
+<!-- PAGE 1 -->
+<div class="page active" id="page1">
+  <div id="countdown">3</div>
+  <div id="msg1">Hello Cutii Annu! 😏<br>Bhaw Jada Bhad Gya Hai! 💖🔥</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page2">
+  <canvas id="p2bg"></canvas>
+  <div class="p2wrap">
+    <div id="gm-title">Good Morning<br>Cutie Pii! ☀️</div>
+    <div id="gm-sub">💕 Tera Din Sundar Ho Jaaye 💕</div>
+    <div id="gm-hearts">💖 💗 💓 💝 💞 💗 💖</div>
+    <button id="btn-cam" onclick="openCamera()">📸 Annu ka Mirror Kholein</button>
+  </div>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page" id="page3">
+  <div id="page3-title">✨ Annu Ji Ka Aaina ✨</div>
+  <div id="cam-wrap">
+    <video id="vid" autoplay muted playsinline></video>
+    <canvas id="ov"></canvas>
+  </div>
+  <div id="compliment">📷 Annu ji... detecting your beauty! 💖</div>
+  <div id="status">Loading AI... 🔮</div>
+</div>
+
+<script>
+/* ===================== GLOBAL ===================== */
+let p1r,p1s,p1c,p1pts,p1id;
+let p2r,p2s,p2c,p2id,p2objs=[];
+let p3id,faceReady=false,lastSpk=0,lastMsg='',curPg=1;
+
+/* ===================== COMPLIMENTS ===================== */
+const C={
+  happy:["Wah Annu! Tumhari smile best smile in the world hai! 😍✨","Itna pyara smile! Annu tum literally sunshine ho! ☀️💖","Annu jab hansti ho stars bhi jealous ho jaate hain! 🌟💕","That smile just BOOM kiya mera dil! 10/10 Annu! 💗","Haha! Yeh wali smile save karna chahta hun! Annu you're adorable! 🌸"],
+  neutral:["Annu bina smile ke bhi stunning lag rahi ho! 💫","Serious mode bhi itna cute? Yaar yeh unfair hai! 😤💖","Beauty: Maximum! Default mode mein bhi Annu gorgeous hai! 👑","Annu tumhara face hi perfect hai, expressions ki zaroorat nahi! 💎","Neutral = Still 100% beautiful. That's Annu power! 🌸✨"],
+  sad:["Aye Annu! Mat ro! Tum bahut cute ho, rona suit nahi karta! 💞","Annu please ek smile do! Tumhari smile se mera din ban jata! ☀️💕","Kya hua Annu? Whatever it is, you're still most beautiful! 🤗💖","Cheer up Cutii! You deserve all happiness! 🌈💕","Annu sad mat hona! Tum bahut precious ho! 💖✨"],
+  surprised:["OMG Annu! Even surprised you look AMAZING! 😱💖","Annu yeh expression bhi itna cute! Kuch bhi karo cute lagta hai! 🥺✨","Surprised Annu = Double cute Annu! 😂💕","Annu ka surprised face = Mujhe bhi surprise kiya! Kitni cute ho! 🌸","Wow expression, wow feelings! Annu you're incredible! 💫"],
+  angry:["Angry Annu bhi pyari lagti hai! Gussa to hai par cute zaroor! 😅💖","Annu gussa mat hona! Itni cute ho gussa suit nahi karta! 🌸","Even angry mode = most beautiful! 10/10 no debate! 🔥💕","Annu ka gussa? Adorable! Sabka cute gussa nahi hota! 😍","OK angry face is also cute! Annu sab rules tod deti ho! 💎✨"],
+  fearful:["Annu darogi mat! Main hoon na! You're safe and beautiful! 💪💖","Scared Annu bhi bravest aur cutest hai! 🌸✨","Annu don't worry! Smile karo sab theek ho jayega! 😊💕","Fearful face bhi adorable hai! Annu too cute for this world! 🥺","Annu tum bahut brave ho! Beautiful too! Never forget! 👑💖"],
+  disgusted:["Annu yeh expression bhi funny aur cute hai! 😂💖","Ajeeb look deke bhi cutest insaan ho! 🌸✨","Whatever expression, Annu still gorgeous! 💅💕","Yaar yeh face bhi cute! Annu bohot unfair ho! 😭💖","Annu disgust face > everyone else best face! That's facts! 👑✨"],
+  noface:["Annu kahan ho? Camera ke paas aao! 📸💖","Come closer Annu! Show me that beautiful face! 🌸","Aye Annu! Apna cute face dikhawo! 😊💕","Main wait kar raha hun Annu! Camera dekhna! 💖✨"]
+};
+
+/* ===================== SPEECH ===================== */
+function speak(txt,rate=0.92,pitch=1.1){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='hi-IN'; u.rate=rate; u.pitch=pitch; u.volume=1;
+  const vs=speechSynthesis.getVoices();
+  const v=vs.find(x=>x.lang.startsWith('hi'))||vs.find(x=>x.name.includes('female')||x.name.includes('Female'))||null;
+  if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+function spkLate(t,d=500,r=0.92,p=1.1){setTimeout(()=>speak(t,r,p),d);}
+
+/* ===================== THREE.JS P1 ===================== */
+function initP1(){
+  const cv=document.getElementById('p1bg');
+  p1s=new THREE.Scene();
+  p1c=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000);
+  p1c.position.z=5;
+  p1r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:window.devicePixelRatio<2});
+  p1r.setSize(innerWidth,innerHeight);
+  p1r.setPixelRatio(Math.min(devicePixelRatio,2));
+
+  // Particle field
+  const g=new THREE.BufferGeometry(),N=600;
+  const pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const pal=[[1,.41,.7],[1,.08,.58],[1,.84,0],[.9,.4,.9],[.7,.85,1]];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*20;
+    pos[i*3+1]=(Math.random()-.5)*20;
+    pos[i*3+2]=(Math.random()-.5)*12;
+    const c=pal[i%pal.length];
+    col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
+  }
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  p1pts=new THREE.Points(g,new THREE.PointsMaterial({size:.07,vertexColors:true,transparent:true,opacity:.85}));
+  p1s.add(p1pts);
+
+  // Floating torus rings
+  for(let i=0;i<6;i++){
+    const tg=new THREE.TorusGeometry(.4+i*.15,.04,8,24);
+    const tm=new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(.9+i*.02,1,.65),transparent:true,opacity:.35});
+    const t=new THREE.Mesh(tg,tm);
+    t.position.set((Math.random()-.5)*8,(Math.random()-.5)*7,(Math.random()-.5)*4);
+    t.userData={iy:t.position.y,ph:Math.random()*Math.PI*2,sp:.4+Math.random()*.6};
+    p1s.add(t);
+  }
+
+  function a1(){
+    p1id=requestAnimationFrame(a1);
+    const t=Date.now()*.001;
+    p1pts.rotation.y=t*.04;p1pts.rotation.x=t*.025;
+    p1s.children.forEach(o=>{
+      if(o.userData.iy!==undefined){
+        o.position.y=o.userData.iy+Math.sin(t*o.userData.sp+o.userData.ph)*.8;
+        o.rotation.x=t*.8;o.rotation.z=t*.5;
+      }
+    });
+    p1r.render(p1s,p1c);
+  }
+  a1();
+}
+
+/* ===================== THREE.JS P2 ===================== */
+function initP2(){
+  const cv=document.getElementById('p2bg');
+  p2s=new THREE.Scene();
+  p2c=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000);
+  p2c.position.z=8;
+  p2r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:window.devicePixelRatio<2});
+  p2r.setSize(innerWidth,innerHeight);
+  p2r.setPixelRatio(Math.min(devicePixelRatio,2));
+
+  // Star field
+  const sg=new THREE.BufferGeometry(),SN=1200;
+  const sp=new Float32Array(SN*3),sc=new Float32Array(SN*3);
+  const sp2=[[1,.41,.7],[1,.08,.58],[1,.84,0],[1,.7,.85],[1,1,1],[.9,.6,.9]];
+  for(let i=0;i<SN;i++){
+    sp[i*3]=(Math.random()-.5)*30;sp[i*3+1]=(Math.random()-.5)*30;sp[i*3+2]=(Math.random()-.5)*12;
+    const c=sp2[i%sp2.length];sc[i*3]=c[0];sc[i*3+1]=c[1];sc[i*3+2]=c[2];
+  }
+  sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+  sg.setAttribute('color',new THREE.BufferAttribute(sc,3));
+  const stars=new THREE.Points(sg,new THREE.PointsMaterial({size:.055,vertexColors:true,transparent:true,opacity:.8}));
+  p2s.add(stars);p2objs.push({o:stars,ry:.015,rx:.008});
+
+  // Torus rings
+  for(let i=0;i<10;i++){
+    const r=.3+Math.random()*.7;
+    const tg=new THREE.TorusGeometry(r,.04,8,30);
+    const tm=new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(.88+Math.random()*.12,1,.7),transparent:true,opacity:.35});
+    const t=new THREE.Mesh(tg,tm);
+    t.position.set((Math.random()-.5)*14,(Math.random()-.5)*12,(Math.random()-.5)*6);
+    t.userData={iy:t.position.y,ph:Math.random()*6.28,fr:.3+Math.random()*.5,rx:.01+Math.random()*.02,rz:.01+Math.random()*.015};
+    p2s.add(t);p2objs.push({o:t,isTorus:true});
+  }
+
+  // Glowing spheres
+  for(let i=0;i<15;i++){
+    const sg2=new THREE.SphereGeometry(.04+Math.random()*.12,6,6);
+    const sm=new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(.83+Math.random()*.15,1,.75),transparent:true,opacity:.65});
+    const s=new THREE.Mesh(sg2,sm);
+    s.position.set((Math.random()-.5)*16,(Math.random()-.5)*12,-2+Math.random()*4);
+    s.userData={iy:s.position.y,ph:Math.random()*6.28,fr:.2+Math.random()*.6};
+    p2s.add(s);p2objs.push({o:s,isSphere:true});
+  }
+
+  function a2(){
+    p2id=requestAnimationFrame(a2);
+    const t=Date.now()*.001;
+    p2objs.forEach(({o,ry,rx,isTorus,isSphere})=>{
+      if(ry)o.rotation.y+=ry;
+      if(rx)o.rotation.x+=rx;
+      if(isTorus){
+        o.position.y=o.userData.iy+Math.sin(t*o.userData.fr+o.userData.ph)*1.8;
+        o.rotation.x+=o.userData.rx;o.rotation.z+=o.userData.rz;
+      }
+      if(isSphere){
+        o.position.y=o.userData.iy+Math.sin(t*o.userData.fr+o.userData.ph)*1.5;
+        const sc=.7+.5*Math.sin(t*o.userData.fr*2+o.userData.ph);
+        o.scale.setScalar(sc);
+      }
+    });
+    p2c.position.x=Math.sin(t*.08)*.6;
+    p2c.position.y=Math.cos(t*.06)*.4;
+    p2r.render(p2s,p2c);
+  }
+  a2();
+}
+
+/* ===================== SPARKLE ===================== */
+function sparkle(x,y){
+  ['💖','✨','🌸','💕','⭐','🌟','💗','🎀','💫'].forEach((e,i)=>{
+    const el=document.createElement('div');
+    el.className='sparkle';el.textContent=e;
+    el.style.left=x+'px';el.style.top=y+'px';
+    const a=(Math.PI*2/8)*i+Math.random()*.4;
+    const d=50+Math.random()*100;
+    el.style.setProperty('--dx',Math.cos(a)*d+'px');
+    el.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1500);
+  });
+}
+document.addEventListener('click',e=>sparkle(e.clientX,e.clientY));
+document.addEventListener('touchstart',e=>sparkle(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+
+/* ===================== PAGE 1 - COUNTDOWN ===================== */
+function runCountdown(){
+  const el=document.getElementById('countdown');
+  const msg=document.getElementById('msg1');
+  let n=3;
+
+  function tick(){
+    el.textContent=n;
+    gsap.fromTo(el,{scale:1.5,opacity:1},{scale:1,opacity:1,duration:.5,ease:'back.out(2)'});
+    speak(n.toString());
+    n--;
+    if(n>=0) setTimeout(tick,1200);
+    else {
+      // BOOM!
+      setTimeout(()=>{
+        el.textContent='💥';
+        gsap.to(el,{scale:3,opacity:0,duration:.9,ease:'expo.out'});
+        // Burst particles
+        if(p1pts){
+          const pa=p1pts.geometry.attributes.position.array;
+          for(let i=0;i<pa.length;i++)pa[i]*=1.8;
+          p1pts.geometry.attributes.position.needsUpdate=true;
+        }
+        // Show message
+        gsap.to(msg,{opacity:1,duration:1.8,delay:.4,ease:'power2.out'});
+        gsap.fromTo(msg,{scale:.8,rotation:-5},{scale:1,rotation:0,duration:1.2,delay:.4,ease:'back.out(2)'});
+        speak("Hello Cutii Annu! Bhaw jada bhad gya hai!",500,.9,1.15);
+        setTimeout(()=>showPage2(),3800);
+      },400);
+    }
+  }
+  setTimeout(tick,800);
+}
+
+/* ===================== PAGE 2 ===================== */
+function showPage2(){
+  curPg=2;
+  document.getElementById('page1').classList.remove('active');
+  document.getElementById('page2').classList.add('active');
+  document.getElementById('backbtn').style.display='none';
+  if(p1id)cancelAnimationFrame(p1id);
+  p2objs=[];
+  initP2();
+
+  const title=document.getElementById('gm-title');
+  const sub=document.getElementById('gm-sub');
+  const hearts=document.getElementById('gm-hearts');
+  const btn=document.getElementById('btn-cam');
+
+  gsap.timeline({delay:.2})
+    .to(title,{opacity:1,scale:1,rotation:0,duration:1.4,ease:'back.out(2.5)'})
+    .to(sub,{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.5')
+    .to(hearts,{opacity:1,scale:1,duration:.8,ease:'bounce.out'},'-=.4')
+    .to(btn,{opacity:1,y:0,duration:1,ease:'back.out(2)'},'-=.3');
+
+  gsap.to(hearts,{y:-12,duration:1.8,ease:'sine.inOut',yoyo:true,repeat:-1});
+  gsap.to(title,{filter:'drop-shadow(0 0 30px rgba(255,20,147,0.9))',duration:1.5,ease:'sine.inOut',yoyo:true,repeat:-1});
+
+  spkLate("Good Morning Cutie Pii! Subah sundar ho jaati hai jab Annu uthti hai!",900);
+}
+
+/* ===================== PAGE 3 - CAMERA ===================== */
+function openCamera(){
+  curPg=3;
+  document.getElementById('page2').classList.remove('active');
+  document.getElementById('page3').classList.add('active');
+  document.getElementById('backbtn').style.display='block';
+  if(p2id)cancelAnimationFrame(p2id);
+  startCamera();
+}
+
+async function startCamera(){
+  const status=document.getElementById('status');
+  const comp=document.getElementById('compliment');
+  speak("Camera kholte hain Annu ji! Dekhte hain aaj kitni cute lag rahi ho!");
+
+  // Load AI models
+  status.textContent='🔮 Loading AI face detection...';
+  try{
+    const MDL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MDL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MDL),
+    ]);
+    faceReady=true;
+    status.textContent='✅ AI Ready! Looking for Annu... 👀';
+    spkLate("AI ready! Ab Annu ka face detect ho sakta hai!",400);
+  }catch(e){
+    faceReady=false;
+    status.textContent='📡 AI offline - camera still works!';
+  }
+
+  // Start cam
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:480},height:{ideal:360}}
+    });
+    const vid=document.getElementById('vid');
+    vid.srcObject=stream;
+    await new Promise(r=>vid.onloadedmetadata=r);
+    await vid.play();
+    status.textContent='✅ Camera on! Dekh raha hun Annu ji 👁️';
+    
+    if(faceReady) runDetect(vid);
+    else fallbackCompliments(comp);
+  }catch(err){
+    status.textContent='❌ Camera denied. Please allow camera!';
+    comp.textContent='Annu camera permission do please! 🥺💖';
+    speak("Annu camera permission do please!");
+  }
+}
+
+function fallbackCompliments(el){
+  const all=[...C.happy,...C.neutral,...C.surprised];
+  let i=0;
+  el.textContent=all[0];
+  setInterval(()=>{i=(i+1)%all.length;el.textContent=all[i];},5000);
+}
+
+async function runDetect(vid){
+  const ov=document.getElementById('ov');
+  const ctx=ov.getContext('2d');
+  const comp=document.getElementById('compliment');
+  const status=document.getElementById('status');
+  let frame=0;
+
+  async function loop(){
+    if(!vid.videoWidth){p3id=requestAnimationFrame(loop);return;}
+    ov.width=vid.videoWidth;ov.height=vid.videoHeight;
+    ctx.clearRect(0,0,ov.width,ov.height);
+    frame++;
+
+    if(frame%20===0){  // Every 20 frames = ~2x/sec
+      try{
+        const det=await faceapi
+          .detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.35}))
+          .withFaceExpressions();
+
+        if(det){
+          status.textContent='💖 Annu found! Analyzing beauty... ✨';
+          const b=det.detection.box;
+          const sx=ov.width/vid.videoWidth,sy=ov.height/vid.videoHeight;
+          const bx=b.x*sx,by=b.y*sy,bw=b.width*sx,bh=b.height*sy;
+
+          // Draw glowing detection box
+          ctx.save();
+          // Outer glow
+          ctx.shadowColor='#ff69b4';ctx.shadowBlur=25;
+          ctx.strokeStyle='#ff69b4';ctx.lineWidth=3;
+          // Animated dashed border
+          ctx.setLineDash([10,5]);
+          ctx.lineDashOffset=-(frame*.5);
+          ctx.strokeRect(bx,by,bw,bh);
+          // Corner brackets
+          ctx.setLineDash([]);
+          ctx.lineWidth=4;
+          const cs=Math.min(bw,bh)*.2;
+          ctx.strokeStyle='#ffd700';
+          ctx.shadowColor='#ffd700';ctx.shadowBlur=15;
+          // TL
+          ctx.beginPath();ctx.moveTo(bx,by+cs);ctx.lineTo(bx,by);ctx.lineTo(bx+cs,by);ctx.stroke();
+          // TR
+          ctx.beginPath();ctx.moveTo(bx+bw-cs,by);ctx.lineTo(bx+bw,by);ctx.lineTo(bx+bw,by+cs);ctx.stroke();
+          // BL
+          ctx.beginPath();ctx.moveTo(bx,by+bh-cs);ctx.lineTo(bx,by+bh);ctx.lineTo(bx+cs,by+bh);ctx.stroke();
+          // BR
+          ctx.beginPath();ctx.moveTo(bx+bw-cs,by+bh);ctx.lineTo(bx+bw,by+bh);ctx.lineTo(bx+bw,by+bh-cs);ctx.stroke();
+          ctx.restore();
+
+          // Label badge
+          ctx.save();
+          ctx.fillStyle='rgba(255,20,147,0.85)';
+          ctx.beginPath();
+          ctx.roundRect?ctx.roundRect(bx,by-32,bw,30,8):ctx.rect(bx,by-32,bw,30);
+          ctx.fill();
+          ctx.fillStyle='#fff';
+          ctx.font=`bold ${Math.max(12,Math.min(16,bw/6))}px Arial`;
+          ctx.textAlign='center';
+          ctx.fillText('✨ Annu Ji ✨',bx+bw/2,by-10);
+          ctx.restore();
+
+          // Get dominant expression
+          const exprs=det.expressions;
+          const top=Object.entries(exprs).sort((a,b)=>b[1]-a[1])[0][0];
+          const now=Date.now();
+          if(now-lastSpk>7000){
+            const list=C[top]||C.neutral;
+            const msg=list[Math.floor(Math.random()*list.length)];
+            if(msg!==lastMsg){
+              lastMsg=msg;lastSpk=now;
+              comp.textContent=msg;
+              speak(msg);
+            }
+          }
+        } else {
+          status.textContent='🔍 Aye Annu! Camera ke paas aao! 👀';
+          if(frame%80===0){
+            const m=C.noface[Math.floor(Math.random()*C.noface.length)];
+            comp.textContent=m;speak(m);
+          }
+        }
+      }catch(e){/* silent */}
+    }
+    p3id=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ===================== BACK ===================== */
+function goBack(){
+  if(curPg===3){
+    document.getElementById('page3').classList.remove('active');
+    document.getElementById('page2').classList.add('active');
+    document.getElementById('backbtn').style.display='none';
+    if(p3id)cancelAnimationFrame(p3id);
+    const v=document.getElementById('vid');
+    if(v.srcObject)v.srcObject.getTracks().forEach(t=>t.stop());
+    curPg=2;
+    p2objs=[];
+    initP2();
+    speak("Good Morning Cutie Pii! Wapas aa gayi Annu!");
+  }
+}
+
+/* ===================== RESIZE ===================== */
+window.addEventListener('resize',()=>{
+  [p1r&&[p1r,p1c],p2r&&[p2r,p2c]].forEach(p=>{
+    if(!p)return;
+    const[r,c]=p;
+    c.aspect=innerWidth/innerHeight;c.updateProjectionMatrix();
+    r.setSize(innerWidth,innerHeight);
+  });
+});
+
+/* ===================== BOOT ===================== */
+async function boot(){
+  const bar=document.getElementById('lbar');
+  const ltxt=document.getElementById('ltext');
+  const lov=document.getElementById('loader');
+
+  ltxt.textContent='💫 Building 3D Universe...';
+  gsap.to(bar,{width:'25%',duration:.7});
+  await new Promise(r=>setTimeout(r,700));
+
+  ltxt.textContent='💖 Adding Pink Stars & Hearts...';
+  gsap.to(bar,{width:'55%',duration:.8});
+  speechSynthesis.getVoices(); // preload
+  await new Promise(r=>setTimeout(r,800));
+
+  ltxt.textContent='🌸 Writing love message...';
+  gsap.to(bar,{width:'80%',duration:.6});
+  await new Promise(r=>setTimeout(r,600));
+
+  ltxt.textContent='✨ Almost Ready...';
+  gsap.to(bar,{width:'100%',duration:.4});
+  await new Promise(r=>setTimeout(r,400));
+
+  gsap.to(lov,{opacity:0,duration:.9,ease:'power2.inOut',onComplete:()=>lov.style.display='none'});
+
+  initP1();
+  setTimeout(runCountdown,900);
+}
+
+window.addEventListener('DOMContentLoaded',boot);
+</script>
+</body>
+</html>
